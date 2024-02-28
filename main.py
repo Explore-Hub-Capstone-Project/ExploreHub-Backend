@@ -12,6 +12,16 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
 from fastapi.security import OAuth2PasswordBearer
+import httpx
+from models import (
+    AirportSearchData1,
+    AirportSearchData2,
+    User,
+    Token,
+    TokenData,
+    UserCreate,
+    LoginSchema,
+)
 
 
 app = FastAPI()
@@ -28,40 +38,11 @@ app.add_middleware(
 )
 
 load_dotenv()
-mongodb_uri = os.getenv('MONGODB_URI')
+mongodb_uri = os.getenv("MONGODB_URI")
 port = 8000
 client = MongoClient(mongodb_uri, port)
 db = client["User"]
 users_collection = db["users"]
-
-
-class User(BaseModel):
-    email: str
-    company: str
-    password: str
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
-class TokenData(BaseModel):
-    email: Optional[str] = None
-
-
-class UserCreate(BaseModel):
-    firstname: str = Field(..., min_length=1)
-    lastname: str = Field(..., min_length=1)
-    email: EmailStr
-    mobile: str = Field(..., min_length=10)
-    country: str
-    password: str = Field(..., min_length=6)
-
-
-class LoginSchema(BaseModel):
-    email: str
-    password: str
 
 
 @app.get("/")
@@ -108,3 +89,58 @@ async def read_user_info(current_user: dict = Depends(get_current_user)):
 
     user_full_name = f"{user_info.get('firstname', '')} {user_info.get('lastname', '')}"
     return {"name": user_full_name.strip()}
+
+
+@app.post("/search-from-airport/")
+async def search_from_airport(data: AirportSearchData1):
+    url = "https://tripadvisor16.p.rapidapi.com/api/v1/flights/searchAirport"
+    querystring = {"query": data.from_}
+    headers = {
+        "X-RapidAPI-Key": os.getenv("X_RAPIDAPI_KEY"),
+        "X-RapidAPI-Host": os.getenv("X_RAPIDAPI_HOST"),
+    }
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, headers=headers, params=querystring)
+    data = response.json()
+
+    try:
+        from_parent_id = data["data"][0]["details"]["parent_ids"][0]
+        from_airport_code = data["data"][0]["airportCode"]
+
+        print("From Parent ID:", from_parent_id)
+        print("From Airport Code:", from_airport_code)
+
+        return {"From_parent_id": from_parent_id, "FromAirportCode": from_airport_code}
+
+    except (IndexError, KeyError) as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Error extracting from airport information: {str(e)}",
+        )
+
+
+@app.post("/search-to-airport/")
+async def search_to_airport(data: AirportSearchData2):
+    url = "https://tripadvisor16.p.rapidapi.com/api/v1/flights/searchAirport"
+    querystring = {"query": data.to_}
+    headers = {
+        "X-RapidAPI-Key": os.getenv("X_RAPIDAPI_KEY"),
+        "X-RapidAPI-Host": os.getenv("X_RAPIDAPI_HOST"),
+    }
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, headers=headers, params=querystring)
+    data = response.json()
+
+    try:
+        to_parent_id = data["data"][0]["details"]["parent_ids"][0]
+        to_airport_code = data["data"][0]["airportCode"]
+
+        print("To Parent ID:", to_parent_id)
+        print("To Airport Code:", to_airport_code)
+
+        return {"To_parent_id": to_parent_id, "ToAirportCode": to_airport_code}
+
+    except (IndexError, KeyError) as e:
+        raise HTTPException(
+            status_code=400, detail=f"Error extracting to airport information: {str(e)}"
+        )
