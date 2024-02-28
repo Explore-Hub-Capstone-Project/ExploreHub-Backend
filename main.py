@@ -91,6 +91,9 @@ async def read_user_info(current_user: dict = Depends(get_current_user)):
     return {"name": user_full_name.strip()}
 
 
+# Airport Codes API
+
+
 @app.post("/search-from-airport/")
 async def search_from_airport(data: AirportSearchData1):
     url = "https://tripadvisor16.p.rapidapi.com/api/v1/flights/searchAirport"
