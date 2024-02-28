@@ -31,6 +31,7 @@ class LoginSchema(BaseModel):
     password: str
 
 
+# Airport Codes Model
 class AirportSearchData1(BaseModel):
     from_: str
 
