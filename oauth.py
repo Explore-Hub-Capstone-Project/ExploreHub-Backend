@@ -3,14 +3,16 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from pymongo import MongoClient
 from jose import jwt, JWTError
+import os
+from dotenv import load_dotenv
 
-
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+load_dotenv()
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
-mongodb_uri = "mongodb+srv://shedaoo:Sagar123@cluster0.2ssna9c.mongodb.net/?retryWrites=true&w=majority"
+mongodb_uri = os.getenv("MONGODB_URI")
 port = 8000
 client = MongoClient(mongodb_uri, port)
 db = client["User"]
