@@ -38,3 +38,18 @@ class AirportSearchData1(BaseModel):
 
 class AirportSearchData2(BaseModel):
     to_: str
+
+
+# Flight Search Model
+
+
+class SearchFlight(BaseModel):
+    sourceAirportCode: str
+    destinationAirportCode: str
+    date: str
+    returnDate: str
+    itineraryType: str
+    sortOrder: str
+    numAdults: int
+    numSeniors: int
+    classOfService: str

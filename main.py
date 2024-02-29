@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from typing import Optional
+from typing import Optional, Dict, Any
 from fastapi import FastAPI, HTTPException, Depends, Request, status, APIRouter
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -11,7 +11,10 @@ from oauth import get_current_user
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
+from datetime import datetime
 from fastapi.security import OAuth2PasswordBearer
+import requests
+
 import httpx
 from models import (
     AirportSearchData1,
@@ -21,6 +24,7 @@ from models import (
     TokenData,
     UserCreate,
     LoginSchema,
+    SearchFlight,
 )
 
 
@@ -147,3 +151,92 @@ async def search_to_airport(data: AirportSearchData2):
         raise HTTPException(
             status_code=400, detail=f"Error extracting to airport information: {str(e)}"
         )
+
+
+@app.post("/search-round-trip-flights/")
+async def search_round_trip_flight(data: SearchFlight):
+    url = "https://tripadvisor16.p.rapidapi.com/api/v1/flights/searchFlights"
+    querystring = data.dict()
+    headers = {
+        "X-RapidAPI-Key": os.getenv("X_RAPIDAPI_KEY"),
+        "X-RapidAPI-Host": os.getenv("X_RAPIDAPI_HOST"),
+    }
+    print(querystring)
+
+    try:
+        response = requests.get(url, headers=headers, params=querystring)
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=response.status_code, detail="Error fetching flight data"
+            )
+
+        data = response.json()
+        flight_pairs = []
+        pair_info: Dict[str, Any] = {}
+
+        for flight in data["data"]["flights"]:
+            pair_info = {"outbound": None, "return": None, "price": None}
+
+            if flight["segments"]:
+                outbound_leg = flight["segments"][0]["legs"][0]
+                return_leg = (
+                    flight["segments"][1]["legs"][0]
+                    if len(flight["segments"]) > 1
+                    else None
+                )
+
+                departure_time_outbound = datetime.fromisoformat(
+                    outbound_leg["departureDateTime"]
+                )
+                arrival_time_outbound = datetime.fromisoformat(
+                    outbound_leg["arrivalDateTime"]
+                )
+                duration_outbound = arrival_time_outbound - departure_time_outbound
+                hours, remainder = divmod(duration_outbound.seconds, 3600)
+                minutes, seconds = divmod(remainder, 60)
+
+                pair_info["outbound"] = {
+                    "Airline Name": outbound_leg["operatingCarrier"]["displayName"],
+                    "Flight Number": outbound_leg["flightNumber"],
+                    "Departure Time": departure_time_outbound.strftime("%H:%M"),
+                    "Arrival Time": arrival_time_outbound.strftime("%H:%M"),
+                    "Duration": f"{hours:02d} h {minutes:02d} m",
+                    "Number of Stops": outbound_leg["numStops"],
+                    "Airline Logo": outbound_leg["operatingCarrier"]["logoUrl"],
+                    "Source City Code": outbound_leg["originStationCode"],
+                    "Destination City Code": outbound_leg["destinationStationCode"],
+                }
+
+                if return_leg:
+
+                    departure_time_return = datetime.fromisoformat(
+                        return_leg["departureDateTime"]
+                    )
+                    arrival_time_return = datetime.fromisoformat(
+                        return_leg["arrivalDateTime"]
+                    )
+                    duration_return = arrival_time_return - departure_time_return
+                    hours, remainder = divmod(duration_return.seconds, 3600)
+                    minutes, seconds = divmod(remainder, 60)
+
+                    pair_info["return"] = {
+                        "Airline Name": return_leg["operatingCarrier"]["displayName"],
+                        "Flight Number": return_leg["flightNumber"],
+                        "Departure Time": departure_time_return.strftime("%H:%M"),
+                        "Arrival Time": arrival_time_return.strftime("%H:%M"),
+                        "Duration": f"{hours:02d} h {minutes:02d} m",
+                        "Number of Stops": return_leg["numStops"],
+                        "Airline Logo": return_leg["operatingCarrier"]["logoUrl"],
+                        "Source City Code": return_leg["originStationCode"],
+                        "Destination City Code": return_leg["destinationStationCode"],
+                    }
+
+                if flight["purchaseLinks"]:
+                    pair_info["price"] = flight["purchaseLinks"][0]["totalPrice"]
+
+                flight_pairs.append(pair_info)
+
+        return flight_pairs
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
