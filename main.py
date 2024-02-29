@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from fastapi import FastAPI, HTTPException, Depends, Request, status, APIRouter
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder

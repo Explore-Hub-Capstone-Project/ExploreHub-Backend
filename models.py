@@ -41,8 +41,6 @@ class AirportSearchData2(BaseModel):
 
 
 # Flight Search Model
-
-
 class SearchFlight(BaseModel):
     sourceAirportCode: str
     destinationAirportCode: str
