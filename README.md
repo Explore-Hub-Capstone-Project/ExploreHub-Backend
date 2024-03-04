@@ -16,10 +16,17 @@ This repository is a FastAPI application that includes user authentication, Mong
 git clone https://github.com/Explore-Hub-Capstone-Project/ExploreHub-Backend
 cd ExploreHub-Backend
 ```
+#### Installation steps
+you can use poetry or pip 
+here are the poetry instructions:
+ - install poetry here: https://python-poetry.org/docs/#installing-with-pipx
+ - run `poetry install`
+ - `poetry run pre-commit install`
+ - For formatting and linting run `poetry run pre-commit` before committing
+ - Recommended: install ide extensions – Mypy, black, flake8
+ - for starting server run 'poetry run start'
 
-#### Install Dependencies
-
-Install all required packages listed in requirements.txt.
+here are the pip instructions:
 
 ```bash
 pip install -r requirements.txt
@@ -29,13 +36,16 @@ pip install -r requirements.txt
 
 It's recommended to use a virtual environment for Python projects to manage dependencies separately for each project.
 
+If you use poetry, it will create the virtual environment for you. 
+
+if you don't use poetry, here are the manual steps:
 #### macOS/Linux
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
-
+## 
 #### Windows
 
 ```bash
@@ -48,9 +58,14 @@ python -m venv venv
 Create a .env file in the root directory of the project and fill it with your MongoDB URI
 
 #### Running the Application
+if you use poetry, you would write :
+```bash
+poetry run start
+```
+if you don't use poetry, you would write:
 
 ```bash
 uvicorn main:app --reload
 ```
 
-This will start the FastAPI application on http://127.0.0.1:8000. You can access the API documentation at http://127.0.0.1:8000/docs.
+This will start the FastAPI application on http://127.0.0.1:5000. You can access the API documentation at http://127.0.0.1:5000/docs.
