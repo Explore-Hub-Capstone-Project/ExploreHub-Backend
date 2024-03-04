@@ -1,12 +1,11 @@
 from datetime import datetime, timedelta
+from typing import Any
 from jose import JWTError, jwt
-import os
-from dotenv import load_dotenv
 
 # from main import TokenData
-load_dotenv()
 
-SECRET_KEY = os.getenv("SECRET_KEY")
+
+SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -19,12 +18,16 @@ def create_access_token(data: dict):
     return encoded_jwt
 
 
-def verify_token(token: str, credentials_exception):
+def verify_token(token: str, credentials_exception: Exception):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
+        email_payload: Any | None = payload.get("user_email", None)
+        id_payload: Any | None = payload.get("user_id", None)
+        if email_payload is None or not isinstance(email_payload, str):
             raise credentials_exception
-        token_data = main.TokenData(username=username)
+        if id_payload is None or not isinstance(id_payload, str):
+            raise credentials_exception
+        return {"email": email_payload, "id": id_payload}
+        # username: str = str(username_payl)
     except JWTError:
         raise credentials_exception
