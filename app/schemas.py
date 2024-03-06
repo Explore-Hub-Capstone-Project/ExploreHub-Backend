@@ -80,9 +80,25 @@ class SearchFlight(BaseModel):
     sourceAirportCode: str
     destinationAirportCode: str
     date: str
-    returnDate: str
+    returnDate: Optional[str]
     itineraryType: str
     sortOrder: str
     numAdults: int
     numSeniors: int
     classOfService: str
+
+
+class FlightDetail(BaseModel):
+    airline: str
+    sourceAirportCode: str
+    destinationAirportCode: str
+    departureDate: str
+    classOfService: str
+    flightNumber: str
+    bookingReference: Optional[str]
+
+
+class FavoriteFlight(BaseModel):
+    outbound: FlightDetail
+    returnFlight: Optional[FlightDetail] = None
+    total_price: float

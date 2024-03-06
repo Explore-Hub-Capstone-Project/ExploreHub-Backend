@@ -242,3 +242,28 @@ async def search_round_trip_flight(data: SearchFlight):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/add_favorite_flight", response_model=list[FavoriteFlight])
+async def add_favorite_flight(
+    favorite_flights: list[FavoriteFlight],
+    current_user: User = Depends(get_current_user),
+    db: Database = Depends(get_db),
+):
+    results = []
+    for favorite_flight in favorite_flights:
+        flight_result = await db_user.add_favorite_flight(
+            db, favorite_flight, current_user.id
+        )
+        if flight_result:
+            results.append(favorite_flight)
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Could not save a favorite flight: {favorite_flight}",
+            )
+    if not results:
+        raise HTTPException(
+            status_code=500, detail="Could not save any favorite flights"
+        )
+    return results

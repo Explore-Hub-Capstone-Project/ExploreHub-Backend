@@ -4,7 +4,7 @@ from pymongo.collection import Collection
 from bson.objectid import ObjectId
 from datetime import datetime
 from app.db.hash import Hash
-from app.schemas import UserCreate, UserGet, User
+from app.schemas import UserCreate, UserGet, User, FavoriteFlight
 from app import jwttoken
 from typing import Any
 
@@ -115,3 +115,13 @@ async def update_user_info(db: Database, email: str, update_data: dict):
     if result.modified_count == 0:
         return None
     return update_data
+
+
+async def add_favorite_flight(
+    db: Database, favorite_flight: FavoriteFlight, user_id: str
+):
+    Collection = db.get_collection("favorite_flights")
+    favorite_flight_data = favorite_flight.dict()
+    favorite_flight_data["user_id"] = user_id
+    result = Collection.insert_one(favorite_flight_data)
+    return result.acknowledged
