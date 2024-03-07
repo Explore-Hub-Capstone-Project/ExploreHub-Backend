@@ -1,20 +1,22 @@
 version: 2.1
 
-orbs:
-  python: circleci/python@2.1.1
-
 jobs:
   build-and-test:
-    executor: python/default
+    docker:
+      - image: cimg/python:3.9
+    working_directory: ~/repo
     steps:
       - checkout
-      - python/install-packages:
-          pkg-manager: pip
+      - run:
+          name: Install specific Python version
+          command: |
+            pyenv install 3.9.0
+            pyenv global 3.9.0
 
       - run:
           name: Setup Python environment
           command: |
-            python3 -m venv venv
+            python -m venv venv
             . venv/bin/activate
 
       - run:
@@ -29,7 +31,6 @@ jobs:
           name: Install additional requirements
           command: pip install -r requirements.txt
 
-      # Run pytest
       - run:
           name: Run tests with pytest
           command: poetry run pytest
