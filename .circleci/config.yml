@@ -7,6 +7,11 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
+      - run:
+          name: Install specific Python version
+          command: |
+            pyenv install 3.9.6
+            pyenv global 3.9.6
 
       - run:
           name: Setup Python environment
