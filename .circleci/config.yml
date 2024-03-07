@@ -6,7 +6,6 @@ orbs:
 jobs:
   build-and-test:
     executor: python/default
-    working_directory: ~/repo
     steps:
       - checkout
       - python/install-packages:
