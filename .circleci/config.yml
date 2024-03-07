@@ -1,1 +1,37 @@
+version: 2.1
 
+jobs:
+  build-and-test:
+    docker:
+      - image: cimg/python:3.9
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Setup Python environment
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+
+      - run:
+          name: Install Poetry
+          command: pip install poetry
+
+      - run:
+          name: Install dependencies with Poetry
+          command: poetry install
+
+      - run:
+          name: Install additional requirements
+          command: pip install -r requirements.txt
+
+      # Run pytest
+      - run:
+          name: Run tests with pytest
+          command: poetry run pytest
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build-and-test
