@@ -9,4 +9,3 @@ email-validator==1.1.3
 pytest
 mongomock
 pydantic-settings
-pydantic
