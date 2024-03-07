@@ -7,6 +7,7 @@ from app.db.hash import Hash
 from app.schemas import UserCreate, UserGet, User, FavoriteFlight
 from app import jwttoken
 from typing import Any
+import asyncio
 
 
 async def get_user_by_id(db: Database, id: int):
@@ -75,7 +76,6 @@ async def create_user(db: Database, request: UserCreate):
         )
 
     user["id"] = str(result.inserted_id)
-    print(user)
     return user
 
 
