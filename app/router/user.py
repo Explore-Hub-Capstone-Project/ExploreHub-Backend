@@ -14,6 +14,7 @@ from app.schemas import (
     AirportSearchData2,
     AirportSearchData1,
     FavoriteFlight,
+    SearchWeather,
 )
 from app.db.database import get_db
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -267,3 +268,33 @@ async def add_favorite_flight(
             status_code=500, detail="Could not save any favorite flights"
         )
     return results
+
+
+@router.post("/get-weather/")
+async def get_weather(data: SearchWeather):
+    api_key = os.getenv("WEATHER_API_KEY")
+    query = data.dict()
+    print("Query is", query)
+    city = query["city"]
+    url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}"
+    response = requests.get(url)
+    weather_info = []
+
+    if response.status_code == 200:
+        data = response.json()
+        temp = data["main"]["temp"]
+        desc = data["weather"][0]["main"]
+        feels_like = data["main"]["feels_like"]
+        humidity = data["main"]["humidity"]
+
+        weather_info.append(
+            {
+                "Temperature": temp,
+                "Description": desc,
+                "Feels": feels_like,
+                "Humidity": humidity,
+            }
+        )
+        return weather_info
+    else:
+        print("Error fetching weather data")
