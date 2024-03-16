@@ -3,36 +3,30 @@ version: 2.1
 jobs:
   build-and-test:
     docker:
-      - image: cimg/python:3.9
+      - image: cimg/python:3.9.6
     working_directory: ~/repo
     steps:
       - checkout
       - run:
-          name: Install specific Python version
-          command: |
-            pyenv install 3.9.6
-            pyenv global 3.9.6
-
-      - run:
-          name: Setup Python environment
-          command: |
-            python3 -m venv venv
-            . venv/bin/activate
-
-      - run:
           name: Install Poetry
-          command: pip install poetry
+          command: |
+            curl -sSL https://install.python-poetry.org | python3 -
 
       - run:
-          name: Install dependencies with Poetry
+          name: Configure Poetry
+          command: |
+            poetry config virtualenvs.create false
+
+      - run:
+          name: Install dependencies
           command: poetry install
 
       - run:
-          name: Run tests with pytest
-          command: pytest
+          name: Run tests
+          command: poetry run pytest
 
 workflows:
   version: 2
-  build_and_test:
+  build-and-test-workflow:
     jobs:
       - build-and-test

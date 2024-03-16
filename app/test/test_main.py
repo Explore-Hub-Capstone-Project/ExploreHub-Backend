@@ -1,59 +1,43 @@
-from fastapi.testclient import TestClient
-from mongomock import MongoClient as MongoMockClient
-from app.db.database import get_db
-from app.config import settings
-from pymongo import MongoClient
-from typing import Dict, Any
-from app.main import app
-from unittest.mock import patch
-from app.schemas import User
-
-client = TestClient(app)
+import pytest
+import mongomock
+from app.db.db_user import create_user
+from app.schemas import UserCreate  # Adjust import as necessary
+from fastapi.exceptions import HTTPException
 
 
-def get_mock_db():
-    client = MongoMockClient()
-    db = client["test_db"]
-    try:
-        yield db
-    finally:
-        client.close()
+@pytest.fixture
+def mock_db():
+    return mongomock.MongoClient().db
 
 
-app.dependency_overrides[get_db] = get_mock_db
+@pytest.fixture
+def user_data():
+    return UserCreate(
+        firstname="John",
+        lastname="Doe",
+        username="johndoe",
+        email="john.doe@example.com",
+        mobile="1234567890",
+        country="USA",
+        password="password123",
+    )
 
 
-def test_mock_database_operations():
-    user_data = {
-        "username": "testuser",
-        "email": "testuser@example.com",
-        "password": "testpassword",
-    }
-    db = next(get_mock_db())
-    users_collection = db["users"]
-    users_collection.insert_one(user_data)
-    retrieved_user = users_collection.find_one({"username": "testuser"})
-    assert (
-        retrieved_user is not None
-    ), "User should have been found in the mock database"
-    assert (
-        retrieved_user["email"] == "testuser@example.com"
-    ), "User email should match the inserted data"
-    users_collection.delete_one({"username": "testuser"})
-    deleted_user = users_collection.find_one({"username": "testuser"})
-    assert deleted_user is None, "User should have been deleted from the mock database"
+@pytest.mark.asyncio
+async def test_create_user_success(mock_db, user_data):
+    created_user = await create_user(mock_db, user_data)
+
+    assert created_user is not None
+    assert created_user["email"] == user_data.email
+    assert "id" in created_user
 
 
-def test_create_user_success():
-    user_data = {
-        "firstname": "John",
-        "lastname": "Doe",
-        "username": "johndoe",
-        "email": "john.doe@example.com",
-        "mobile": "1234567890",
-        "country": "Country",
-        "password": "password",
-    }
-    response = client.post("/user/register", json=user_data)
-    assert response.status_code == 201
-    assert response.json()["email"] == user_data["email"]
+@pytest.mark.asyncio
+async def test_create_user_email_exists(mock_db, user_data):
+    mock_db.get_collection("users").insert_one({"email": user_data.email})
+
+    with pytest.raises(HTTPException) as exc_info:
+        await create_user(mock_db, user_data)
+
+    assert exc_info.value.status_code == 400
+    assert "Email already registered" in str(exc_info.value.detail)

@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     X_RAPIDAPI_KEY: str
     X_RAPIDAPI_HOST: str
+    WEATHER_API_KEY: str
 
     class Config:
         env_file = ".env"
