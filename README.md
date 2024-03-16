@@ -1,3 +1,5 @@
+[![CircleCI](https://dl.circleci.com/status-badge/img/circleci/Nz6HcS3RP2iARiLEhS7sKA/d252626f-5f96-4785-ae64-1b46453187d1/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/circleci/Nz6HcS3RP2iARiLEhS7sKA/d252626f-5f96-4785-ae64-1b46453187d1/tree/main)
+
 # FastAPI Backend Application Setup
 
 This repository is a FastAPI application that includes user authentication, MongoDB integration, and more.
