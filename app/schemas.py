@@ -102,3 +102,7 @@ class FavoriteFlight(BaseModel):
     outbound: FlightDetail
     returnFlight: Optional[FlightDetail] = None
     total_price: float
+
+
+class SearchWeather(BaseModel):
+    city: str
