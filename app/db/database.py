@@ -6,10 +6,6 @@ import os
 
 def get_db():
     mongodb_uri = settings.MONGODB_URI
-
-    # if the env var MONGODB_URI exists
-    # then use it as the uri for MongoClient
-    # otherwise use the one in settings.connection_string
     client: MongoClient[Dict[str, Any]] = MongoClient(mongodb_uri, settings.port)
     db = client[settings.database_name]
 
