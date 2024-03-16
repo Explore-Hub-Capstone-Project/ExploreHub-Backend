@@ -1,7 +1,7 @@
 import pytest
 import mongomock
 from app.db.db_user import create_user
-from app.schemas import UserCreate  # Adjust import as necessary
+from app.schemas import UserCreate
 from fastapi.exceptions import HTTPException
 
 
