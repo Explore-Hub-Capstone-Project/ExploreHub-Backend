@@ -10,7 +10,7 @@ jobs:
       - run:
           name: Install Poetry
           command: |
-            curl -sSL https://install.python-poetry.org | python3 - --version ^1.2
+            pip install poetry==1.7.1
 
       - run:
           name: Configure Poetry
