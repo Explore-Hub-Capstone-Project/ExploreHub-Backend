@@ -1,4 +1,4 @@
-[![CircleCI](https://dl.circleci.com/status-badge/img/circleci/Nz6HcS3RP2iARiLEhS7sKA/d252626f-5f96-4785-ae64-1b46453187d1/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/circleci/Nz6HcS3RP2iARiLEhS7sKA/d252626f-5f96-4785-ae64-1b46453187d1/tree/main)
+[![CircleCI](https://dl.circleci.com/status-badge/img/circleci/Nz6HcS3RP2iARiLEhS7sKA/SyLuVRPkuQZ9tjAcjYqiEk/tree/main.svg?style=svg&circle-token=CCIPRJ_DaT8vkVivYCjKAV9kzoPdk_c30c487ba9f51a1a0c3155178cfe7aaac5bc8826)](https://dl.circleci.com/status-badge/redirect/circleci/Nz6HcS3RP2iARiLEhS7sKA/SyLuVRPkuQZ9tjAcjYqiEk/tree/main)
 
 # FastAPI Backend Application Setup
 
