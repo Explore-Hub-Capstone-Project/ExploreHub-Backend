@@ -272,14 +272,13 @@ async def add_favorite_flight(
 
 @router.post("/get-weather/")
 async def get_weather(data: SearchWeather):
-    api_key = os.getenv("WEATHER_API_KEY")
+    api_key = os.getenv("WEATHER_API_KEY") or ""
     query = data.dict()
     print("Query is", query)
     city = query["city"]
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}"
     response = requests.get(url)
     weather_info = []
-
     if response.status_code == 200:
         data = response.json()
         temp = data["main"]["temp"]
