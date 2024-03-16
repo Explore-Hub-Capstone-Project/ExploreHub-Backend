@@ -9,7 +9,7 @@ readme = "README.md"
 start = "app.main:start"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.9.6"
 requests = "^2.31.0"
 fastapi = "^0.109.2"
 pydantic = {extras = ["email"], version = "^2.6.1"}
