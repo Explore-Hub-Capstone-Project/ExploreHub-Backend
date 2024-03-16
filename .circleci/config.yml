@@ -15,7 +15,7 @@ jobs:
       - run:
           name: Configure Poetry
           command: |
-            poetry config virtualenvs.create true
+            poetry config virtualenvs.create false
 
       - run:
           name: Install Pytest Asyncio
