@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   build-and-test:
     docker:
-      - image: cimg/python:3.12.1
+      - image: cimg/python:3.9.6
     working_directory: ~/repo
     steps:
       - checkout
@@ -16,6 +16,12 @@ jobs:
           name: Configure Poetry
           command: |
             poetry config virtualenvs.create false
+
+      - run:
+          name: Create Environment
+          command: |
+            python3 -m venv venv
+            source venv/bin/activate
 
       - run:
           name: Install Pytest Asyncio
