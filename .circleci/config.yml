@@ -33,8 +33,17 @@ jobs:
           command: poetry install
 
       - run:
-          name: Run tests
-          command: pytest
+          name: Run tests and generate JUnit XML report
+          command: |
+            mkdir -p test-results/pytest
+            pytest --junitxml=test-results/pytest/junit.xml
+
+      - store_test_results:
+          path: test-results
+
+      - store_artifacts:
+          path: test-results
+          destination: test-results
 
 workflows:
   version: 2
