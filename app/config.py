@@ -1,3 +1,4 @@
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -8,7 +9,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     X_RAPIDAPI_KEY: str
     X_RAPIDAPI_HOST: str
-    WEATHER_API_KEY: str
+    WEATHER_API_KEY: str = Field(None, env="WEATHER_API_KEY")
 
     class Config:
         env_file = ".env"
