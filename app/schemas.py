@@ -68,11 +68,11 @@ class LoginDisplay(BaseModel):
 
 # Airport Codes Model
 class AirportSearchData1(BaseModel):
-    from_: str = Field(..., alias="from")
+    from_: str
 
 
 class AirportSearchData2(BaseModel):
-    to_: str = Field(..., alias="to")
+    to_: str
 
 
 # Flight Search Model
