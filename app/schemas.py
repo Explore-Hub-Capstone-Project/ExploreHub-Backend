@@ -129,9 +129,10 @@ class HotelFilter(BaseModel):
 
 
 class HotelDetailsRequest(BaseModel):
-    id: str
+    geoId: int
     checkIn: str
     checkOut: str
+    adults: int
 
 
 class Configuration(BaseModel):

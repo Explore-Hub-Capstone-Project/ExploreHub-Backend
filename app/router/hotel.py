@@ -8,6 +8,7 @@ from app.schemas import (
     LocInfo,
     HotelDetails,
     HotelDetailDisplay,
+    HotelDetailsRequest,
     HotelData,
     PhotoItem,
     PhotoItemSizeDynamic,
@@ -106,8 +107,8 @@ async def hotels_filter(filter: HotelFilter):
             )
 
 
-@router.post("/search-hotels", response_model=list[HotelData])
-async def search_hotels(filter: HotelFilter):
+@router.post("/search-hotels/", response_model=list[HotelData])
+async def search_hotels(filter: HotelDetailsRequest):
     url = "https://tripadvisor16.p.rapidapi.com/api/v1/hotels/searchHotels"
     headers = {
         "X-RapidAPI-Key": os.getenv("X_RAPIDAPI_KEY"),
@@ -117,8 +118,7 @@ async def search_hotels(filter: HotelFilter):
         "geoId": filter.geoId,
         "checkIn": filter.checkIn,
         "checkOut": filter.checkOut,
-        "pageNumber": "1",
-        "currencyCode": "USD",
+        "adults": filter.adults,
     }
     async with httpx.AsyncClient() as client:
         response = await client.get(
@@ -133,7 +133,7 @@ async def search_hotels(filter: HotelFilter):
         # print(data)
         hotels_data = data.get("data", {}).get("data", [])
         filtered_hotel_data = []
-        for hotel in hotels_data:
+        for hotel in hotels_data[:10]:
             bubble_rating = {
                 "rating": float(hotel.get("bubbleRating", {}).get("rating", 0)),
                 "count": hotel.get("bubbleRating", {}).get("count", "0"),
