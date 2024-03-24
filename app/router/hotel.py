@@ -170,7 +170,7 @@ async def search_hotels(filter: HotelDetailsRequest):
     # return [HotelData(**hotel) for hotel in filtered_hotel_data]
 
 
-@router.post("/get-hotels-details", response_model=HotelDetailDisplay)
+@router.post("/get-hotels-details/", response_model=HotelDetailDisplay)
 async def hotel_details(details: HotelDetails):
     url = "https://tripadvisor16.p.rapidapi.com/api/v1/hotels/getHotelDetails"
     headers = {
@@ -178,10 +178,9 @@ async def hotel_details(details: HotelDetails):
         "X-RapidAPI-Host": "tripadvisor16.p.rapidapi.com",
     }
     params = {
-        "id": details.accomodation_id,
+        "id": details.id,
         "checkIn": details.checkIn,
         "checkOut": details.checkOut,
-        "currency": "USD",
     }
     async with httpx.AsyncClient() as client:
         response = await client.get(

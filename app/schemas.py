@@ -201,7 +201,7 @@ class HotelData(BaseModel):
 
 
 class HotelDetails(BaseModel):
-    accomodation_id: str
+    id: str
     checkIn: str
     checkOut: str
 
