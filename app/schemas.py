@@ -313,3 +313,9 @@ class HotelDetailDisplay(BaseModel):
     attractionsNearby: Optional[list[Attraction]] = None
     qA: Optional[list[QuestionAnswer]] = None
     amenitiesScreen: Optional[List[AmenityDetail]] = None
+
+
+class AttractionsMain(BaseModel):
+    location_id: str
+    language: str
+    currency: str
