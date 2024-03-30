@@ -15,6 +15,8 @@ from app.schemas import (
     AirportSearchData1,
     FavoriteFlight,
     SearchWeather,
+    SaveForLater,
+    CartItem,
 )
 from app.db.database import get_db
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -245,31 +247,6 @@ async def search_round_trip_flight(data: SearchFlight):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/add_favorite_flight", response_model=list[FavoriteFlight])
-async def add_favorite_flight(
-    favorite_flights: list[FavoriteFlight],
-    current_user: User = Depends(get_current_user),
-    db: Database = Depends(get_db),
-):
-    results = []
-    for favorite_flight in favorite_flights:
-        flight_result = await db_user.add_favorite_flight(
-            db, favorite_flight, current_user.id
-        )
-        if flight_result:
-            results.append(favorite_flight)
-        else:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Could not save a favorite flight: {favorite_flight}",
-            )
-    if not results:
-        raise HTTPException(
-            status_code=500, detail="Could not save any favorite flights"
-        )
-    return results
-
-
 @router.post("/get-weather/")
 async def get_weather(data: SearchWeather):
     api_key = os.getenv("WEATHER_API_KEY") or ""
@@ -297,3 +274,64 @@ async def get_weather(data: SearchWeather):
         return weather_info
     else:
         print("Error fetching weather data")
+
+
+@router.post("/add_favorite_flight", response_model=list[FavoriteFlight])
+async def add_favorite_flight(
+    favorite_flights: list[FavoriteFlight],
+    current_user: User = Depends(get_current_user),
+    db: Database = Depends(get_db),
+):
+    results = []
+    for favorite_flight in favorite_flights:
+        flight_result = await db_user.add_favorite_flight(
+            db, favorite_flight, current_user.id
+        )
+        if flight_result:
+            results.append(favorite_flight)
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Could not save a favorite flight: {favorite_flight}",
+            )
+    if not results:
+        raise HTTPException(
+            status_code=500, detail="Could not save any favorite flights"
+        )
+    return results
+
+
+@router.post("/save-cart/")
+def save_cart(
+    cart_data: SaveForLater,
+    db: Database = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    try:
+        collection_name = f"user_{cart_data.userEmail.replace('@', '_').replace('.', '_')}_saved_carts"
+        result = db[collection_name].insert_one(cart_data.dict(by_alias=True))
+
+        return {"message": "Cart saved successfully!", "id": str(result.inserted_id)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/save-for-later/")
+async def save_for_later(
+    save_data: SaveForLater,
+    db: Database = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+
+    user_collection = db["users"]
+    user_data = user_collection.find_one({"email": save_data.userEmail})
+
+    if not user_data:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    cart_collection = db["saved-carts"]
+    save_data_dict = save_data.dict(by_alias=True)
+    save_data_dict["userId"] = user_data["_id"]
+    cart_collection.insert_one(save_data_dict)
+
+    return {"message": "Data saved successfully"}

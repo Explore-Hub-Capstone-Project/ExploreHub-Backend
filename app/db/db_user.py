@@ -4,7 +4,7 @@ from pymongo.collection import Collection
 from bson.objectid import ObjectId
 from datetime import datetime
 from app.db.hash import Hash
-from app.schemas import UserCreate, UserGet, User, FavoriteFlight
+from app.schemas import UserCreate, UserGet, User, FavoriteFlight, CartItem
 from app import jwttoken
 from typing import Any
 import asyncio

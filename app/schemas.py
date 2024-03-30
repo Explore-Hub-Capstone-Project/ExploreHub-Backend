@@ -313,3 +313,18 @@ class HotelDetailDisplay(BaseModel):
     attractionsNearby: Optional[list[Attraction]] = None
     qA: Optional[list[QuestionAnswer]] = None
     amenitiesScreen: Optional[List[AmenityDetail]] = None
+
+
+class CartItem(BaseModel):
+    outbound: Optional[FlightDetail] = None
+    return_flight: Optional[FlightDetail] = Field(None, alias="return_flight")
+    hotel: Optional[HotelData] = None
+    price: Optional[int] = None
+
+    class Config:
+        extra = "allow"
+
+
+class SaveForLater(BaseModel):
+    userEmail: str
+    cartItems: List[CartItem]
