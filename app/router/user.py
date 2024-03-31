@@ -1,7 +1,10 @@
 from typing import List
 from typing import Annotated, Any, Dict
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, status
+from app.db.encoder import custom_jsonable_encoder
+import pydantic
+from pydantic import HttpUrl, BaseModel
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from pymongo.database import Database
 from app.schemas import (
     UserDisplay,
@@ -23,6 +26,8 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.jwttoken import verify_token
 from app import config
 from functools import lru_cache
+import json
+import traceback
 
 # from app.db.db_user import create_user, get_all_users, get_user, update_user, delete_user
 from app.db import db_user
@@ -301,37 +306,64 @@ async def add_favorite_flight(
     return results
 
 
-@router.post("/save-cart/")
-def save_cart(
-    cart_data: SaveForLater,
-    db: Database = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    try:
-        collection_name = f"user_{cart_data.userEmail.replace('@', '_').replace('.', '_')}_saved_carts"
-        result = db[collection_name].insert_one(cart_data.dict(by_alias=True))
+def convert_field_to_string(cart_items: Any, field_path: list):
+    """
+    Convert specified fields to strings in a nested structure.
+    :param cart_items: The part of the data structure to process.
+    :param field_path: The path to the field to convert, as a list of keys.
+    """
+    if not field_path:
+        return
 
-        return {"message": "Cart saved successfully!", "id": str(result.inserted_id)}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    key_to_convert = field_path[-1]
+    for item in cart_items:
+        current_level = item
+        for key in field_path[:-1]:
+            if key in current_level and isinstance(current_level[key], dict):
+                current_level = current_level[key]
+            else:
+                break
+        if key_to_convert in current_level:
+            current_level[key_to_convert] = str(current_level[key_to_convert])
 
 
 @router.post("/save-for-later/")
-async def save_for_later(
-    save_data: SaveForLater,
-    db: Database = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
+async def save_for_later(cart_data: SaveForLater, db: Database = Depends(get_db)):
+    try:
+        cart_dict = cart_data.dict(by_alias=True)
 
-    user_collection = db["users"]
-    user_data = user_collection.find_one({"email": save_data.userEmail})
+        convert_field_to_string(
+            cart_dict.get("cart_items", []), ["outbound", "airline_logo"]
+        )
+        convert_field_to_string(
+            cart_dict.get("cart_items", []), ["return", "airline_logo"]
+        )
 
-    if not user_data:
-        raise HTTPException(status_code=404, detail="User not found")
+        collection = db["saved_carts"]
+        collection.insert_one(cart_dict)
+        return {"message": "Save successful", "data": cart_dict}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
-    cart_collection = db["saved-carts"]
-    save_data_dict = save_data.dict(by_alias=True)
-    save_data_dict["userId"] = user_data["_id"]
-    cart_collection.insert_one(save_data_dict)
 
-    return {"message": "Data saved successfully"}
+# async def save_for_later(cart_data: SaveForLater, db: Database = Depends(get_db)):
+#     try:
+#         # The `db` parameter now directly references the MongoDB database instance
+#         collection = db['saved_carts']
+#         # Convert Pydantic model to dictionary for MongoDB
+#         cart_dict = cart_data.dict()
+#         collection.insert_one(cart_dict)
+#         return {"message": "Save successful", "data": cart_dict}
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+# async def save_for_later(request: Request, db: Database = Depends(get_db)):
+#     try:
+#         request_json = await request.json()
+#         print(json.dumps(request_json, indent=4))  # Log the received JSON data
+#         cart_data = SaveForLater(
+#             **request_json
+#         )  # Try to create a Pydantic model instance
+#         ...
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")

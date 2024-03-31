@@ -125,3 +125,11 @@ async def add_favorite_flight(
     favorite_flight_data["user_id"] = user_id
     result = Collection.insert_one(favorite_flight_data)
     return result.acknowledged
+
+
+# async def save_trip(db: Database, saved_trip: CartItem, user_id: str):
+#     Collection = db.get_collection("saved_trip")
+#     saved_trip_data = save_trip.dict()
+#     saved_trip_data["user_id"] = user_id
+#     result = Collection.insert_one(saved_trip_data)
+#     return result.acknowledged
