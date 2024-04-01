@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, HttpUrl
+from pydantic import BaseModel, EmailStr, Field, HttpUrl, AnyHttpUrl
 import re
 from typing import List, Optional, Union
 
@@ -211,6 +211,11 @@ class Photo(BaseModel):
     maxWidth: Optional[int] = None
     urlTemplate: Optional[HttpUrl] = None
 
+    class Config:
+        json_encoders = {
+            HttpUrl: lambda v: str(v),
+        }
+
 
 class LocalizedString(BaseModel):
     __typename: str
@@ -313,3 +318,53 @@ class HotelDetailDisplay(BaseModel):
     attractionsNearby: Optional[list[Attraction]] = None
     qA: Optional[list[QuestionAnswer]] = None
     amenitiesScreen: Optional[List[AmenityDetail]] = None
+
+
+class FlightDetails(BaseModel):
+    airline_name: str = Field(..., alias="Airline Name")
+    flight_number: int = Field(..., alias="Flight Number")
+    departure_time: str = Field(..., alias="Departure Time")
+    arrival_time: str = Field(..., alias="Arrival Time")
+    duration: str = Field(..., alias="Duration")
+    number_of_stops: int = Field(..., alias="Number of Stops")
+    airline_logo: HttpUrl = Field(..., alias="Airline Logo")
+    source_city_code: str = Field(..., alias="Source City Code")
+    destination_city_code: str = Field(..., alias="Destination City Code")
+
+    class Config:
+        json_encoders = {
+            HttpUrl: lambda v: str(v),
+        }
+
+
+class AccommodationPhoto(BaseModel):
+    sizes: dict
+
+
+class HotelsData(BaseModel):
+    accomodation_id: str
+    accomodation: str
+    breakfast_info: str
+    accomodation_region: str
+    accomodation_rating: dict
+    accomodation_provider: str
+    priceForDisplay: str
+    strikethroughPrice: Optional[str] = None
+    priceDetails: str
+    priceSummary: Optional[str] = None
+    accomodation_photos: List[AccommodationPhoto]
+
+
+class CartItem(BaseModel):
+    outbound: Optional[FlightDetails] = None
+    return_flight: Optional[FlightDetails] = None
+    hotel: Optional[HotelsData] = None
+    price: Optional[float] = None
+
+
+class SaveForLater(BaseModel):
+    user_email: str = Field(..., alias="userEmail")
+    cart_items: list[CartItem] = Field(..., alias="cartItems")
+
+    class Config:
+        populate_by_name = True

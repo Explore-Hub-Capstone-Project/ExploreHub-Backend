@@ -1,7 +1,9 @@
 from typing import List
 from typing import Annotated, Any, Dict
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, status
+import pydantic
+from pydantic import HttpUrl, BaseModel
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from pymongo.database import Database
 from app.schemas import (
     UserDisplay,
@@ -245,31 +247,6 @@ async def search_round_trip_flight(data: SearchFlight):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/add_favorite_flight", response_model=list[FavoriteFlight])
-async def add_favorite_flight(
-    favorite_flights: list[FavoriteFlight],
-    current_user: User = Depends(get_current_user),
-    db: Database = Depends(get_db),
-):
-    results = []
-    for favorite_flight in favorite_flights:
-        flight_result = await db_user.add_favorite_flight(
-            db, favorite_flight, current_user.id
-        )
-        if flight_result:
-            results.append(favorite_flight)
-        else:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Could not save a favorite flight: {favorite_flight}",
-            )
-    if not results:
-        raise HTTPException(
-            status_code=500, detail="Could not save any favorite flights"
-        )
-    return results
-
-
 @router.post("/get-weather/")
 async def get_weather(data: SearchWeather):
     api_key = os.getenv("WEATHER_API_KEY") or ""
@@ -297,3 +274,51 @@ async def get_weather(data: SearchWeather):
         return weather_info
     else:
         print("Error fetching weather data")
+
+
+@router.post("/add_favorite_flight", response_model=list[FavoriteFlight])
+async def add_favorite_flight(
+    favorite_flights: list[FavoriteFlight],
+    current_user: User = Depends(get_current_user),
+    db: Database = Depends(get_db),
+):
+    results = []
+    for favorite_flight in favorite_flights:
+        flight_result = await db_user.add_favorite_flight(
+            db, favorite_flight, current_user.id
+        )
+        if flight_result:
+            results.append(favorite_flight)
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Could not save a favorite flight: {favorite_flight}",
+            )
+    if not results:
+        raise HTTPException(
+            status_code=500, detail="Could not save any favorite flights"
+        )
+    return results
+
+
+@router.post("/add_save_trip/")
+async def save_for_later(request: Request, db: Database = Depends(get_db)):
+    try:
+        request_json = await request.json()
+        user_email = request_json.get("userEmail")
+        users_collection = db["users"]
+        user = users_collection.find_one({"email": user_email})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        user_id_str = str(user["_id"])
+        request_json["user_id"] = user_id_str
+        saved_trips_collection = db["saved_trips"]
+        insert_result = saved_trips_collection.insert_one(request_json)
+
+        return {
+            "message": "Trip saved successfully",
+            "id": str(insert_result.inserted_id),
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
