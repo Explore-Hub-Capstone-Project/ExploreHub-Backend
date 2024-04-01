@@ -306,44 +306,27 @@ async def add_favorite_flight(
     return results
 
 
-def convert_field_to_string(cart_items: Any, field_path: list):
-    """
-    Convert specified fields to strings in a nested structure.
-    :param cart_items: The part of the data structure to process.
-    :param field_path: The path to the field to convert, as a list of keys.
-    """
-    if not field_path:
-        return
-
-    key_to_convert = field_path[-1]
-    for item in cart_items:
-        current_level = item
-        for key in field_path[:-1]:
-            if key in current_level and isinstance(current_level[key], dict):
-                current_level = current_level[key]
-            else:
-                break
-        if key_to_convert in current_level:
-            current_level[key_to_convert] = str(current_level[key_to_convert])
-
-
-@router.post("/save-for-later/")
-async def save_for_later(cart_data: SaveForLater, db: Database = Depends(get_db)):
-    try:
-        cart_dict = cart_data.dict(by_alias=True)
-
-        convert_field_to_string(
-            cart_dict.get("cart_items", []), ["outbound", "airline_logo"]
-        )
-        convert_field_to_string(
-            cart_dict.get("cart_items", []), ["return", "airline_logo"]
-        )
-
-        collection = db["saved_carts"]
-        collection.insert_one(cart_dict)
-        return {"message": "Save successful", "data": cart_dict}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+# @router.post("/add_save_flight/", response_model=list[SaveForLater])
+# async def add_saved_flight(
+#     saved_flights: list[SaveForLater],
+#     current_user: User = Depends(get_current_user),
+#     db: Database = Depends(get_db),
+# ):
+#     results = []
+#     for saved_flight in saved_flights:
+#         flight_result = await db_user.saved_flight(db, saved_flight, current_user.id)
+#         if flight_result:
+#             results.append(saved_flight)
+#         else:
+#             raise HTTPException(
+#                 status_code=500,
+#                 detail=f"Could not save a favorite flight: {saved_flight}",
+#             )
+#     if not results:
+#         raise HTTPException(
+#             status_code=500, detail="Could not save any favorite flights"
+#         )
+#     return results
 
 
 # async def save_for_later(cart_data: SaveForLater, db: Database = Depends(get_db)):
@@ -357,13 +340,20 @@ async def save_for_later(cart_data: SaveForLater, db: Database = Depends(get_db)
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
-# async def save_for_later(request: Request, db: Database = Depends(get_db)):
-#     try:
-#         request_json = await request.json()
-#         print(json.dumps(request_json, indent=4))  # Log the received JSON data
-#         cart_data = SaveForLater(
-#             **request_json
-#         )  # Try to create a Pydantic model instance
-#         ...
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+@router.post("/add_save_trip/")
+async def save_for_later(request: Request, db: Database = Depends(get_db)):
+    try:
+        request_json = await request.json()
+        # print(json.dumps(request_json, indent=4))
+
+        collection = db["saved_trips"]
+        insert_result = collection.insert_one(request_json)
+
+        return {
+            "message": "Data saved successfully",
+            "id": str(insert_result.inserted_id),
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")

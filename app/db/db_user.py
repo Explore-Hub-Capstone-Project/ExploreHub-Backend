@@ -4,7 +4,14 @@ from pymongo.collection import Collection
 from bson.objectid import ObjectId
 from datetime import datetime
 from app.db.hash import Hash
-from app.schemas import UserCreate, UserGet, User, FavoriteFlight, CartItem
+from app.schemas import (
+    UserCreate,
+    UserGet,
+    User,
+    FavoriteFlight,
+    CartItem,
+    SaveForLater,
+)
 from app import jwttoken
 from typing import Any
 import asyncio
@@ -127,9 +134,9 @@ async def add_favorite_flight(
     return result.acknowledged
 
 
-# async def save_trip(db: Database, saved_trip: CartItem, user_id: str):
-#     Collection = db.get_collection("saved_trip")
-#     saved_trip_data = save_trip.dict()
-#     saved_trip_data["user_id"] = user_id
-#     result = Collection.insert_one(saved_trip_data)
-#     return result.acknowledged
+async def saved_flight(db: Database, save_trip: SaveForLater, user_id: str):
+    Collection = db.get_collection("saved_flights")
+    saved_trip_data = save_trip.dict()
+    saved_trip_data["user_id"] = user_id
+    result = Collection.insert_one(saved_trip_data)
+    return result.acknowledged
