@@ -1,7 +1,6 @@
 from typing import List
 from typing import Annotated, Any, Dict
 from datetime import datetime
-from app.db.encoder import custom_jsonable_encoder
 import pydantic
 from pydantic import HttpUrl, BaseModel
 from fastapi import APIRouter, Depends, HTTPException, status, Request
@@ -18,16 +17,12 @@ from app.schemas import (
     AirportSearchData1,
     FavoriteFlight,
     SearchWeather,
-    SaveForLater,
-    CartItem,
 )
 from app.db.database import get_db
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.jwttoken import verify_token
 from app import config
 from functools import lru_cache
-import json
-import traceback
 
 # from app.db.db_user import create_user, get_all_users, get_user, update_user, delete_user
 from app.db import db_user
@@ -306,52 +301,22 @@ async def add_favorite_flight(
     return results
 
 
-# @router.post("/add_save_flight/", response_model=list[SaveForLater])
-# async def add_saved_flight(
-#     saved_flights: list[SaveForLater],
-#     current_user: User = Depends(get_current_user),
-#     db: Database = Depends(get_db),
-# ):
-#     results = []
-#     for saved_flight in saved_flights:
-#         flight_result = await db_user.saved_flight(db, saved_flight, current_user.id)
-#         if flight_result:
-#             results.append(saved_flight)
-#         else:
-#             raise HTTPException(
-#                 status_code=500,
-#                 detail=f"Could not save a favorite flight: {saved_flight}",
-#             )
-#     if not results:
-#         raise HTTPException(
-#             status_code=500, detail="Could not save any favorite flights"
-#         )
-#     return results
-
-
-# async def save_for_later(cart_data: SaveForLater, db: Database = Depends(get_db)):
-#     try:
-#         # The `db` parameter now directly references the MongoDB database instance
-#         collection = db['saved_carts']
-#         # Convert Pydantic model to dictionary for MongoDB
-#         cart_dict = cart_data.dict()
-#         collection.insert_one(cart_dict)
-#         return {"message": "Save successful", "data": cart_dict}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
-
-
 @router.post("/add_save_trip/")
 async def save_for_later(request: Request, db: Database = Depends(get_db)):
     try:
         request_json = await request.json()
-        # print(json.dumps(request_json, indent=4))
-
-        collection = db["saved_trips"]
-        insert_result = collection.insert_one(request_json)
+        user_email = request_json.get("userEmail")
+        users_collection = db["users"]
+        user = users_collection.find_one({"email": user_email})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        user_id_str = str(user["_id"])
+        request_json["user_id"] = user_id_str
+        saved_trips_collection = db["saved_trips"]
+        insert_result = saved_trips_collection.insert_one(request_json)
 
         return {
-            "message": "Data saved successfully",
+            "message": "Trip saved successfully",
             "id": str(insert_result.inserted_id),
         }
 
