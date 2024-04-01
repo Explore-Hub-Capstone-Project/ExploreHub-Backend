@@ -322,3 +322,22 @@ async def save_for_later(request: Request, db: Database = Depends(get_db)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@router.get("/profile")
+async def read_user_profile(current_user: dict = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user_id_str = str(current_user.get("_id"))
+
+    user_profile = {
+        "user_email": current_user.get("email"),
+        "user_first_name": current_user.get("firstname"),
+        "user_last_name": current_user.get("lastname"),
+        "user_phone": current_user.get("mobile"),
+        "user_country": current_user.get("country"),
+        "_id": user_id_str,
+    }
+
+    return user_profile
