@@ -9,14 +9,12 @@ from app.schemas import (
 )
 import os
 import httpx
+from typing import List
 
-router = APIRouter(
-    prefix="/attraction",
-    tags=["attractions"],
-)
+router = APIRouter(prefix="/attraction", tags=["attractions"])
 
 
-@router.post("/search-attractions", response_model=list[AttractionData])
+@router.post("/search-attractions", response_model=List[AttractionData])
 async def search_attractions(detail: AttractionRequest):
     url = "https://tourist-attraction.p.rapidapi.com/search"
     headers = {
@@ -35,70 +33,73 @@ async def search_attractions(detail: AttractionRequest):
         )
 
         if response.status_code != 200:
-            print(response.request.url)
-
-            print(response)
-            print(response.history)
-
-            print(response.text)
-            raise HTTPException(
-                status_code=500,
-                detail=response.json().get("results", "Api request failed"),
-            )
+            raise HTTPException(status_code=500, detail="API request failed")
 
         data = response.json()
         attractions_data = data.get("results", {}).get("data", [])
         filtered_data = []
-        for attraction in attractions_data:
-            photo_data = attraction.get("photo", {}).get("images", {})
+
+        for attraction in attractions_data[:10]:  # Limit to 10 attractions
             photos = PhotoUrls(
-                small=photo_data.get("small", {}).get("url", ""),
-                medium=photo_data.get("medium", {}).get("url", ""),
-                large=photo_data.get("large", {}).get("url", ""),
-                original=photo_data.get("original", {}).get("url", ""),
+                small=attraction.get("photo", {})
+                .get("images", {})
+                .get("small", {})
+                .get("url"),
+                medium=attraction.get("photo", {})
+                .get("images", {})
+                .get("medium", {})
+                .get("url"),
+                large=attraction.get("photo", {})
+                .get("images", {})
+                .get("large", {})
+                .get("url"),
+                original=attraction.get("photo", {})
+                .get("images", {})
+                .get("original", {})
+                .get("url"),
             )
-            subcategory = [
-                sub.get("name", "") for sub in attraction.get("subcategory", [])
+            offer_list = [
+                TourOfferDetail(**offer)
+                for offer in attraction.get("offer_group", {}).get("offer_list", [])
             ]
-            subtype = [subs.get("name", "") for subs in attraction.get("subtype", [])]
             booking_data = attraction.get("booking", {})
             booking = Booking(
-                provider_name=booking_data.get("provider", ""),
-                url=booking_data.get("url", ""),
+                provider_name=booking_data.get("provider"),
+                url=booking_data.get("url"),
             )
             animal_data = attraction.get("animal_welfare_tag", {})
             animal_feature = AnimalTag(
-                tag=animal_data.get("tag_text", ""),
-                msg_header=animal_data.get("msg_header", ""),
-                msg_body=animal_data.get("msg_body", ""),
-                learn_more_text=animal_data.get("leanr_more_text", ""),
-                education_portal_url=animal_data.get("education_portal_url", ""),
+                tag=animal_data.get("tag_text"),
+                msg_header=animal_data.get("msg_header"),
+                msg_body=animal_data.get("msg_body"),
+                learn_more_text=animal_data.get("learn_more_text"),
+                education_portal_url=animal_data.get("education_portal_url"),
             )
-
-            offer_list = []
-            for offer in attraction.get("offer_group", {}).get("offer_list", []):
-                offer_list.append(TourOfferDetail(**offer))
 
             filtered_data.append(
-                {
-                    "location_id": attraction.get("location_id"),
-                    "attraction_name": attraction.get("name"),
-                    "attraction_reviews_count": attraction.get("num_reviews"),
-                    "attraction_location": attraction.get("location_string"),
-                    "attraction_photos": photos,
-                    "attraction_raw_ranking": attraction.get("raw_ranking"),
-                    "attraction_rating": attraction.get("ranking"),
-                    "attraction_description": attraction.get("description"),
-                    "attraction_weburl": attraction.get("web_url"),
-                    "attraction_category": subcategory,
-                    "attraction_phone": attraction.get("phone"),
-                    "attraction_website": attraction.get("website"),
-                    "attraction_address": attraction.get("address"),
-                    "attraction_subtype": subtype,
-                    "attraction_offer_tours": offer_list,
-                    "attraction_booking": booking,
-                    "attraction_animal_tag": animal_feature,
-                }
+                AttractionData(
+                    location_id=attraction.get("location_id"),
+                    attraction_name=attraction.get("name"),
+                    attraction_reviews_count=int(attraction.get("num_reviews", 0)),
+                    attraction_location=attraction.get("location_string"),
+                    attraction_photos=photos,
+                    attraction_raw_ranking=float(attraction.get("raw_ranking", 0)),
+                    attraction_rating=attraction.get("ranking"),
+                    attraction_description=attraction.get("description"),
+                    attraction_weburl=attraction.get("web_url"),
+                    attraction_category=[
+                        sub.get("name", "") for sub in attraction.get("subcategory", [])
+                    ],
+                    attraction_phone=attraction.get("phone"),
+                    attraction_website=attraction.get("website"),
+                    attraction_address=attraction.get("address"),
+                    attraction_subtype=[
+                        subs.get("name", "") for subs in attraction.get("subtype", [])
+                    ],
+                    attraction_offer_tours=offer_list,
+                    attraction_booking=booking,
+                    attraction_animal_tag=animal_feature,
+                )
             )
-        print(filtered_data)
+
         return filtered_data
