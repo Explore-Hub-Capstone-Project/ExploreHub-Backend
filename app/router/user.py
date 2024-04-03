@@ -43,16 +43,35 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login")
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)], db: Database = Depends(get_db)
 ):
+    print(f"Debug: Received token: {token}")
+    try:
+        id_email = verify_token(
+            token,
+            HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=" not authorized.",
+            ),
+        )
+        print(f"Debug: Token verified, user ID/email: {id_email}")  # Debugging log
+    except HTTPException as e:
+        print(f"Debug: Token verification failed: {e.detail}")  # Debugging log
+        raise e
 
-    id_email = verify_token(
-        token,
-        HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=" not authorized.",
-        ),
-    )
+    try:
+        user = await db_user.get_user(db, UserGet(id=id_email["id"]))
+        print(f"Debug: User retrieved from DB: {user}")  # Debugging log
+    except Exception as e:
+        print(f"Debug: Error retrieving user from DB: {e}")  # Debugging log
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error.",
+        )
 
-    user: User = await db_user.get_user(db, UserGet(id=id_email["id"]))
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found."
+        )
+
     return user
 
 
