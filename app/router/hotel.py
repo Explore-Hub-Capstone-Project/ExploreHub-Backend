@@ -186,9 +186,13 @@ async def hotel_details(details: HotelDetails):
         response = await client.get(
             url, headers=headers, params=params, timeout=httpx.Timeout(timeout=20.0)
         )
-        if response.status_code != 200:
+        json = response.json()
+        if response.status_code != 200 or json.get("status") is False:
             raise HTTPException(
-                status_code=response.status_code, detail="API call failed"
+                status_code=(
+                    response.status_code if response.status_code != 200 else 500
+                ),
+                detail=json.get("message"),
             )
         print(response.json())
         data = response.json().get("data")

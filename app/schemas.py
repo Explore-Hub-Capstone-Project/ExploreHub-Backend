@@ -368,3 +368,61 @@ class SaveForLater(BaseModel):
 
     class Config:
         populate_by_name = True
+
+
+class TourOfferDetail(BaseModel):
+    url: Optional[str] = None
+    price: Optional[str] = None
+    rounded_up_price: Optional[str] = None
+    offer_type: Optional[str] = None
+    tour_title: Optional[str] = None
+    partner: Optional[str] = None
+    image_url: Optional[str] = None
+    description: Optional[str] = None
+    tour_category: Optional[str] = None
+
+
+class PhotoUrls(BaseModel):
+    small: Optional[HttpUrl]
+    medium: Optional[HttpUrl]
+    large: Optional[HttpUrl]
+    original: Optional[HttpUrl]
+
+
+class Booking(BaseModel):
+    provider_name: Optional[str] = None
+    url: Optional[HttpUrl] = None
+
+
+class AnimalTag(BaseModel):
+    tag: Optional[str] = None
+    msg_header: Optional[str] = None
+    msg_body: Optional[str] = None
+    learn_more_text: Optional[str] = None
+    education_portal_url: Optional[Union[str, HttpUrl]] = None
+
+
+class AttractionData(BaseModel):
+    location_id: str
+    attraction_name: str
+    attraction_reviews_count: int
+    attraction_location: str
+    attraction_photos: PhotoUrls
+    attraction_raw_ranking: float
+    attraction_rating: str
+    attraction_description: str
+    attraction_weburl: Optional[HttpUrl] = None
+    attraction_category: List[str]
+    attraction_phone: Optional[str] = None
+    attraction_website: Optional[HttpUrl] = None
+    attraction_address: Optional[str] = None
+    attraction_subtype: List[str]
+    attraction_offer_tours: List[TourOfferDetail]
+    attraction_booking: Optional[Booking] = None
+    attraction_animal_tag: Optional[AnimalTag] = None
+
+
+class AttractionRequest(BaseModel):
+    location_id: str
+    language: str
+    currency: str
