@@ -100,5 +100,5 @@ async def search_attractions(detail: AttractionRequest):
                     "attraction_animal_tag": animal_feature,
                 }
             )
-            print(filtered_data)
-            return filtered_data
+        print(filtered_data)
+        return filtered_data
