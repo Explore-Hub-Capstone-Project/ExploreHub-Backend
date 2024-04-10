@@ -27,9 +27,9 @@ from functools import lru_cache
 # from app.db.db_user import create_user, get_all_users, get_user, update_user, delete_user
 from app.db import db_user
 import os
-import httpx
 import requests
 import logging
+import httpx
 
 
 router = APIRouter(
@@ -111,7 +111,12 @@ async def search_from_airport(airport_data: AirportSearchData1):
         "X-RapidAPI-Host": os.getenv("X_RAPIDAPI_HOST") or "",
     }
     async with httpx.AsyncClient() as client:
-        response = await client.get(url, headers=headers, params=querystring)
+        response = await client.get(
+            url,
+            headers=headers,
+            params=querystring,
+            timeout=httpx.Timeout(timeout=15.0),
+        )
     response_data = response.json()
     print(response_data)
     try:
@@ -140,7 +145,12 @@ async def search_to_airport(search_data: AirportSearchData2):
         "X-RapidAPI-Host": os.getenv("X_RAPIDAPI_HOST", ""),
     }
     async with httpx.AsyncClient() as client:
-        response = await client.get(url, headers=headers, params=querystring)
+        response = await client.get(
+            url,
+            headers=headers,
+            params=querystring,
+            timeout=httpx.Timeout(timeout=15.0),
+        )
     response_data = response.json()
 
     try:
