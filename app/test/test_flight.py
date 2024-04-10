@@ -96,34 +96,34 @@ def test_search_from_airport_success(airport_search_data_from_success):
     assert response.status_code == 200
 
 
-# @pytest.fixture
-# def airport_search_data_from_failure():
-#     return {"from_": "XXX"}
+@pytest.fixture
+def airport_search_data_from_failure():
+    return {"from_": "XXX"}
 
 
-# @responses.activate
-# def test_search_from_airport_failure(airport_search_data_from_failure):
-#     mock_response_data = {
-#         "data": [
-#             {
-#                 "details": {
-#                     "parent_ids": ["1234"],
-#                 },
-#                 "airportCode": "JFK",
-#             }
-#         ]
-#     }
-#     responses.add(
-#         responses.GET,
-#         "https://tripadvisor16.p.rapidapi.com/api/v1/flights/searchAirport",
-#         json=mock_response_data,
-#         status=400,
-#     )
+@responses.activate
+def test_search_from_airport_failure(airport_search_data_from_failure):
+    mock_response_data = {
+        "data": [
+            {
+                "details": {
+                    "parent_ids": ["1234"],
+                },
+                "airportCode": "JFK",
+            }
+        ]
+    }
+    responses.add(
+        responses.GET,
+        "https://tripadvisor16.p.rapidapi.com/api/v1/flights/searchAirport",
+        json=mock_response_data,
+        status=400,
+    )
 
-#     response = client.post(
-#         "/user/search-from-airport/", json=airport_search_data_from_failure
-#     )
-#     assert response.status_code != 200
+    response = client.post(
+        "/user/search-from-airport/", json=airport_search_data_from_failure
+    )
+    assert response.status_code != 200
 
 
 @pytest.fixture
@@ -156,31 +156,31 @@ def test_search_to_airport_success(airport_search_data_to_success):
     assert response.status_code == 200
 
 
-# @pytest.fixture
-# def airport_search_data_to_failure():
-#     return {"to_": "XXX"}
+@pytest.fixture
+def airport_search_data_to_failure():
+    return {"to_": "XXX"}
 
 
-# @responses.activate
-# def test_search_to_airport_failure(airport_search_data_to_failure):
-#     mock_response_data = {
-#         "data": [
-#             {
-#                 "details": {
-#                     "parent_ids": ["1234"],
-#                 },
-#                 "airportCode": "JFK",
-#             }
-#         ]
-#     }
-#     responses.add(
-#         responses.GET,
-#         "https://tripadvisor16.p.rapidapi.com/api/v1/flights/searchAirport",
-#         json=mock_response_data,
-#         status=400,
-#     )
+@responses.activate
+def test_search_to_airport_failure(airport_search_data_to_failure):
+    mock_response_data = {
+        "data": [
+            {
+                "details": {
+                    "parent_ids": ["1234"],
+                },
+                "airportCode": "JFK",
+            }
+        ]
+    }
+    responses.add(
+        responses.GET,
+        "https://tripadvisor16.p.rapidapi.com/api/v1/flights/searchAirport",
+        json=mock_response_data,
+        status=400,
+    )
 
-#     response = client.post(
-#         "/user/search-to-airport/", json=airport_search_data_to_failure
-#     )
-#     assert response.status_code != 200
+    response = client.post(
+        "/user/search-to-airport/", json=airport_search_data_to_failure
+    )
+    assert response.status_code != 200

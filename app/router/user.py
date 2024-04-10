@@ -111,7 +111,12 @@ async def search_from_airport(airport_data: AirportSearchData1):
         "X-RapidAPI-Host": os.getenv("X_RAPIDAPI_HOST") or "",
     }
     async with httpx.AsyncClient() as client:
-        response = await client.get(url, headers=headers, params=querystring)
+        response = await client.get(
+            url,
+            headers=headers,
+            params=querystring,
+            timeout=httpx.Timeout(timeout=15.0),
+        )
     response_data = response.json()
     print(response_data)
     try:
