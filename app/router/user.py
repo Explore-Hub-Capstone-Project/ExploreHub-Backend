@@ -340,8 +340,8 @@ async def search_one_way_flight(data: SearchOneWayFlight):
     url = "https://tripadvisor16.p.rapidapi.com/api/v1/flights/searchFlights"
     querystring = data.dict()
     headers = {
-        "X-RapidAPI-Key": "22e66d4f58msh0942688c9a3a6bbp103f7ejsn284b71172003",
-        "X-RapidAPI-Host": "tripadvisor16.p.rapidapi.com",
+        "X-RapidAPI-Key": os.getenv("X_RAPIDAPI_KEY", ""),
+        "X-RapidAPI-Host": os.getenv("X_RAPIDAPI_HOST", ""),
     }
     print(querystring)
 
