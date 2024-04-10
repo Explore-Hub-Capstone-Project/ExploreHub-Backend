@@ -426,3 +426,14 @@ class AttractionRequest(BaseModel):
     location_id: str
     language: str
     currency: str
+
+
+class SearchOneWayFlight(BaseModel):
+    sourceAirportCode: str
+    destinationAirportCode: str
+    date: str
+    itineraryType: str
+    sortOrder: str
+    numAdults: int
+    numSeniors: int
+    classOfService: str
