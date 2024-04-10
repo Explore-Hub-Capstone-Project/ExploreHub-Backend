@@ -17,6 +17,7 @@ from app.schemas import (
     AirportSearchData1,
     FavoriteFlight,
     SearchWeather,
+    SearchOneWayFlight,
 )
 from app.db.database import get_db
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -332,3 +333,74 @@ async def save_for_later(request: Request, db: Database = Depends(get_db)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@router.post("/search-one-way-flights/")
+async def search_one_way_flight(data: SearchOneWayFlight):
+    url = "https://tripadvisor16.p.rapidapi.com/api/v1/flights/searchFlights"
+    querystring = data.dict()
+    headers = {
+        "X-RapidAPI-Key": "22e66d4f58msh0942688c9a3a6bbp103f7ejsn284b71172003",
+        "X-RapidAPI-Host": "tripadvisor16.p.rapidapi.com",
+    }
+    print(querystring)
+
+    try:
+        response = requests.get(url, headers=headers, params=querystring)
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=response.status_code, detail="Error fetching flight data"
+            )
+
+        data = response.json()
+        flights_info = []
+
+        if "data" in data and "flights" in data["data"]:
+            for flight in data["data"]["flights"]:
+                for segment in flight["segments"]:
+                    for leg in segment["legs"]:
+                        airline_name = leg["operatingCarrier"]["displayName"]
+                        flight_number = leg["flightNumber"]
+                        departure_time_str = leg["departureDateTime"]
+                        departure_with_tz = datetime.strptime(
+                            departure_time_str, "%Y-%m-%dT%H:%M:%S%z"
+                        )
+                        final_departure_time = departure_with_tz.strftime("%H:%M")
+
+                        arrival_time_str = leg["arrivalDateTime"]
+                        arrival_with_tz = datetime.strptime(
+                            arrival_time_str, "%Y-%m-%dT%H:%M:%S%z"
+                        )
+                        final_arrival_time = arrival_with_tz.strftime("%H:%M")
+
+                        time_taken = arrival_with_tz - departure_with_tz
+                        hours, remainder = divmod(time_taken.seconds, 3600)
+                        minutes, _ = divmod(remainder, 60)
+
+                        number_of_stops = (
+                            "Direct"
+                            if leg["numStops"] == 0
+                            else f"{leg['numStops']} Stop(s)"
+                        )
+
+                        airline_logo = leg["operatingCarrier"]["logoUrl"]
+
+                        flights_info.append(
+                            {
+                                "Airline Name": airline_name,
+                                "Flight Number": flight_number,
+                                "Departure Time": final_departure_time,
+                                "Arrival Time": final_arrival_time,
+                                "Duration": f"{hours:02d} h {minutes:02d} m",
+                                "Number of Stops": number_of_stops,
+                                "Price of Flight": flight["purchaseLinks"][0][
+                                    "totalPrice"
+                                ],
+                                "Airline Logo": airline_logo,
+                            }
+                        )
+
+        return flights_info
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
