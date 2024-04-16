@@ -1,0 +1,36 @@
+name: ExploreHub-Backend(API) Deployment
+run-name: ${{ github.actor }} triggered the deployment! 🚀
+on:
+  push:
+    branches:
+      - main
+jobs:
+  Deploy:
+    runs-on: [ubuntu-latest, aarch64]
+    steps:
+    - uses: actions/checkout@v4
+    - name: copy the code to the server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        port: ${{ secrets.PORT }}
+        source: "*,!Anita.pem"
+        target: /home/ec2-user
+        key_path: ${{ secrets.KEY_PATH}}
+
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key_path: ${{ secrets.KEY_PATH}}
+        port: ${{ secrets.PORT }}
+        script: |
+          sudo lsof -ti:5000 | xargs -r sudo kill -9
+          cd ExploreHub-Backend
+          poetry install
+          nohup poetry run start &
+      
+
+
