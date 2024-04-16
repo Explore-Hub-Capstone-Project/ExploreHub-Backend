@@ -3,8 +3,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    database_name: str = "ExploreHub-DB"
-    port: int = "5000"
+    DATABASE_NAME: str = "ExploreHub-DB"
+    PORT: int = 5001
     MONGODB_URI: str = "mongodb://localhost:5000"
     SECRET_KEY: str = Field(None, env="SECRET_KEY")
     X_RAPIDAPI_KEY: str = Field(None, env="X-RAPIDAPI-KEY")
