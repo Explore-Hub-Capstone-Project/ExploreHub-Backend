@@ -7,7 +7,7 @@ on:
       - main
 jobs:
   Deploy:
-    runs-on: [ubuntu-latest, aarch64]
+    runs-on: [ubuntu-latest]
     steps:
     - uses: actions/checkout@v4
     - name: copy the code to the server
