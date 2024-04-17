@@ -18,7 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: copy the code to the server
-      uses: appleboy/scp-action@v0.1.7
+      uses: appleboy/scp-action@v0.1.6
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
