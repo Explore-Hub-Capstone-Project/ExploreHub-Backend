@@ -1,10 +1,17 @@
 name: ExploreHub-Backend(API) Deployment
 run-name: ${{ github.actor }} triggered the deployment! 🚀
 on:
-  push:
-  workflow_dispatch:
+  push: # event name for act
+  workflow_dispatch: #event name for act
     branches:
       - main
+env:
+  MONGODB_URI: ${{ secrets.MANGODB_URI}}
+  SECRET_KEY: ${{ secrets.SECRET_KEY}}
+  X_RAPIDAPI_KEY: ${{ secrets.X_RAPIDAPI_KEY}}
+  X_RAPIDAPI_HOST: ${{ secrets.X_RAPIDAPI_HOST}}
+  WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY}}
+  
 jobs:
   Deploy:
     runs-on: [ubuntu-latest]
@@ -15,23 +22,25 @@ jobs:
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
-        port: ${{ secrets.PORT }}
         source: "*,!Anita.pem"
         target: /home/ec2-user
-        key: ${{ secrets.SSH_KEY}}
+        key: |
+          ${{ secrets.SSH_KEY}}
 
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.SSH_KEY}}
-        port: ${{ secrets.PORT }}
+        envs: MONGODB_URI,SECRET_KEY,X_RAPIDAPI_KEY,X_RAPIDAPI_HOST,WEATHER_API_KEY
+        key: |
+          ${{ secrets.SSH_KEY}}
         script: |
           sudo lsof -ti:5000 | xargs -r sudo kill -9
           cd ExploreHub-Backend
           poetry install
           nohup poetry run start &
+
       
 
 
