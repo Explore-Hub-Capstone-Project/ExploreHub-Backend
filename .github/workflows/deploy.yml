@@ -2,7 +2,7 @@ name: ExploreHub-Backend(API) Deployment
 run-name: ${{ github.actor }} triggered the deployment! 🚀
 on:
   push:
-  workflow dispatch:
+  workflow_dispatch:
     branches:
       - main
 jobs:
