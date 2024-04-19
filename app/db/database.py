@@ -6,8 +6,8 @@ import os
 
 def get_db():
     mongodb_uri = settings.MONGODB_URI
-    client: MongoClient[Dict[str, Any]] = MongoClient(mongodb_uri, settings.port)
-    db = client[settings.database_name]
+    client: MongoClient[Dict[str, Any]] = MongoClient(mongodb_uri, settings.PORT)
+    db = client[settings.DATABASE_NAME]
 
     try:
         yield db
