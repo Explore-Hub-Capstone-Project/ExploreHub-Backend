@@ -23,7 +23,7 @@ jobs:
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
-        source: "*,!Anita.pem"
+        source: "*"
         target: /home/ec2-user # destination path on the remote server
         key: |
           ${{ secrets.SSH_KEY}}
