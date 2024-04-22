@@ -46,11 +46,13 @@ async def search_location(location_data: Location):
     async with httpx.AsyncClient() as client:
         response = await client.get(url, headers=headers, params=params)
         if response.status_code != 200:
-            raise HTTPException(
-                status_code=response.status_code, detail="API call failed"
-            )
+            print(response)
+
+            raise HTTPException(status_code=response.status_code, detail=response.json)
 
         data = response.json()
+        # if response.status_code == 422:
+        #     print(data)
         locs_data = data.get("data", [])
 
         print(locs_data)
@@ -84,7 +86,7 @@ async def hotels_filter(filter: HotelFilter):
     print(f"Requesting {url} with params {params} and headers {headers}")
     async with httpx.AsyncClient() as client:
         response = await client.get(
-            url, headers=headers, params=params, timeout=httpx.Timeout(timeout=15.0)
+            url, headers=headers, params=params, timeout=httpx.Timeout(timeout=40.0)
         )
         print("Response received:", response)  # Log the response data
         if response.status_code == 200:
@@ -122,7 +124,7 @@ async def search_hotels(filter: HotelDetailsRequest):
     }
     async with httpx.AsyncClient() as client:
         response = await client.get(
-            url, headers=headers, params=params, timeout=httpx.Timeout(timeout=20.0)
+            url, headers=headers, params=params, timeout=httpx.Timeout(timeout=40.0)
         )
         print(response)
         if response.status_code != 200:
@@ -184,7 +186,7 @@ async def hotel_details(details: HotelDetails):
     }
     async with httpx.AsyncClient() as client:
         response = await client.get(
-            url, headers=headers, params=params, timeout=httpx.Timeout(timeout=20.0)
+            url, headers=headers, params=params, timeout=httpx.Timeout(timeout=40.0)
         )
         json = response.json()
         if response.status_code != 200 or json.get("status") is False:

@@ -49,7 +49,7 @@ async def get_current_user(
         token,
         HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=" not authorized.",
+            detail="not authorized. Invalid Token",
         ),
     )
 
@@ -116,7 +116,7 @@ async def search_from_airport(airport_data: AirportSearchData1):
             url,
             headers=headers,
             params=querystring,
-            timeout=httpx.Timeout(timeout=15.0),
+            timeout=httpx.Timeout(timeout=40.0),
         )
     response_data = response.json()
     print(response_data)
@@ -150,7 +150,7 @@ async def search_to_airport(search_data: AirportSearchData2):
             url,
             headers=headers,
             params=querystring,
-            timeout=httpx.Timeout(timeout=15.0),
+            timeout=httpx.Timeout(timeout=40.0),
         )
     response_data = response.json()
 

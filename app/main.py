@@ -11,7 +11,13 @@ from fastapi.middleware.cors import CORSMiddleware
 load_dotenv()
 app = FastAPI()
 
-origins = ["http://localhost:3000"]
+origins = [
+    "0.0.0.0:3000",
+    "http://localhost:3000",
+    # "http://ec2-3-15-144-73.us-east-2.compute.amazonaws.com",
+    # "https://ec2-3-15-144-73.us-east-2.compute.amazonaws.com",
+    # "https://www.explorehub.lol",
+]
 app.include_router(user.router)
 app.include_router(hotel.router)
 app.include_router(attraction.router)
@@ -27,8 +33,8 @@ app.add_middleware(
 def start():
     uvicorn.run(
         "app.main:app",
-        host="localhost",
-        port=settings.port,
+        host="0.0.0.0",
+        port=settings.PORT,
         reload=False,
     )
 

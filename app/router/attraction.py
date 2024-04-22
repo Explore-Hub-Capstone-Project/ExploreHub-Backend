@@ -29,10 +29,11 @@ async def search_attractions(detail: AttractionRequest):
 
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            url, headers=headers, data=payload, timeout=httpx.Timeout(timeout=15.0)
+            url, headers=headers, data=payload, timeout=httpx.Timeout(timeout=40.0)
         )
 
         if response.status_code != 200:
+            print({response: response})
             raise HTTPException(status_code=500, detail="API request failed")
 
         data = response.json()

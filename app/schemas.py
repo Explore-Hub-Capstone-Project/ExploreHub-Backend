@@ -203,7 +203,7 @@ class HotelData(BaseModel):
 class HotelDetails(BaseModel):
     id: str
     checkIn: str
-    checkOut: str
+    checkOut: Optional[str]
 
 
 class Photo(BaseModel):
