@@ -6,7 +6,7 @@ on:
     branches:
       - main
 env:
-  MONGODB_URI: ${{ secrets.MANGODB_URI}}
+  MONGODB_URI: ${{ secrets.MONGODB_URI}}
   SECRET_KEY: ${{ secrets.SECRET_KEY}}
   X_RAPIDAPI_KEY: ${{ secrets.X_RAPIDAPI_KEY}}
   X_RAPIDAPI_HOST: ${{ secrets.X_RAPIDAPI_HOST}}
@@ -23,7 +23,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          source: "*,!Anita.pem"
+          source: "*"
           target: /home/ec2-user # destination path on the remote server
           key: |
             ${{ secrets.SSH_KEY}}
@@ -39,5 +39,9 @@ jobs:
           script: |
             sudo lsof -ti:5000 | xargs -r sudo kill -9
             cd ExploreHub-Backend
+            echo $SECRET_KEY
+            echo $X_RAPIDAPI_KEY
+            echo $X_RAPIDAPI_HOST
+            echo $WEATHER_API_KEY
             poetry install
             nohup poetry run start > logs.txt 2>&1 &
