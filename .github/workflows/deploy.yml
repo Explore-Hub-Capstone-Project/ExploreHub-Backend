@@ -11,37 +11,33 @@ env:
   X_RAPIDAPI_KEY: ${{ secrets.X_RAPIDAPI_KEY}}
   X_RAPIDAPI_HOST: ${{ secrets.X_RAPIDAPI_HOST}}
   WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY}}
-  
+
 jobs:
   Deploy:
     environment: production environment
     runs-on: [ubuntu-latest]
     steps:
-    - uses: actions/checkout@v4
-    - name: copy the code to the server
-      uses: appleboy/scp-action@v0.1.6
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        source: "*,!Anita.pem"
-        target: /home/ec2-user # destination path on the remote server
-        key: |
-          ${{ secrets.SSH_KEY}}
+      - uses: actions/checkout@v4
+      - name: copy the code to the server
+        uses: appleboy/scp-action@v0.1.6
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          source: "*,!Anita.pem"
+          target: /home/ec2-user # destination path on the remote server
+          key: |
+            ${{ secrets.SSH_KEY}}
 
-    - name: executing remote ssh commands using password
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        envs: MONGODB_URI,SECRET_KEY,X_RAPIDAPI_KEY,X_RAPIDAPI_HOST,WEATHER_API_KEY
-        key: |
-          ${{ secrets.SSH_KEY}}
-        script: |
-          sudo lsof -ti:5000 | xargs -r sudo kill -9
-          cd ExploreHub-Backend
-          poetry install
-          nohup poetry run start &
-
-      
-
-
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          envs: MONGODB_URI,SECRET_KEY,X_RAPIDAPI_KEY,X_RAPIDAPI_HOST,WEATHER_API_KEY
+          key: |
+            ${{ secrets.SSH_KEY}}
+          script: |
+            sudo lsof -ti:5000 | xargs -r sudo kill -9
+            cd ExploreHub-Backend
+            poetry install
+            nohup poetry run start > logs.txt 2>&1 &
