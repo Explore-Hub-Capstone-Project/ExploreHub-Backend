@@ -11,7 +11,7 @@ env:
   X_RAPIDAPI_KEY: ${{ secrets.X_RAPIDAPI_KEY}}
   X_RAPIDAPI_HOST: ${{ secrets.X_RAPIDAPI_HOST}}
   WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY}}
-  WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY}}
+
 
 jobs:
   Deploy:
