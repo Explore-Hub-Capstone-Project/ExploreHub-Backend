@@ -137,7 +137,7 @@ async def search_hotels(filter: HotelDetailsRequest):
         filtered_hotel_data = []
         for hotel in hotels_data[:10]:
             bubble_rating = {
-                "rating": float(hotel.get("bubbleRating", {}).get("rating", 0)),
+                "rating": float(hotel.get("bubbleRating", {}).get("rating", 0) or 0),
                 "count": hotel.get("bubbleRating", {}).get("count", "0"),
             }
 
