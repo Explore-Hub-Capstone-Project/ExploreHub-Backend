@@ -58,7 +58,7 @@ async def get_current_user(
 
 
 @router.post(
-    "/register/", response_model=UserDisplay, status_code=status.HTTP_201_CREATED
+    "/register", response_model=UserDisplay, status_code=status.HTTP_201_CREATED
 )
 async def register_user(request: UserCreate, db: Database = Depends(get_db)):
     return await db_user.create_user(db, request)
