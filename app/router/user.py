@@ -40,6 +40,9 @@ router = APIRouter(
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login")
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)], db: Database = Depends(get_db)
@@ -404,3 +407,29 @@ async def search_one_way_flight(data: SearchOneWayFlight):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/get_saved_trips/", status_code=status.HTTP_200_OK)
+async def get_saved_trips(
+    current_user: UserDisplay = Depends(get_current_user),
+    db: Database = Depends(get_db),
+):
+    try:
+        logger.info("Fetching user's saved trips")
+        saved_trips_collection = db["saved_trips"]
+        logger.info(f"Looking up trips for user email: {current_user.email}")
+        saved_trips_cursor = saved_trips_collection.find(
+            {"userEmail": current_user.email}
+        )
+
+        saved_trips = list(saved_trips_cursor)
+
+        logger.info(f"Number of trips found: {len(saved_trips)}")
+        for trip in saved_trips:
+            trip.pop("_id", None)
+
+        return {"message": "Saved trips fetched successfully", "trips": saved_trips}
+
+    except Exception as e:
+        logger.error(f"An error occurred: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
