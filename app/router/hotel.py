@@ -70,7 +70,7 @@ async def search_location(location_data: Location):
         return LocationSearchResponse(locs=locs)
 
 
-@router.post("/get-hotels-filter", response_model=HotelsFilterResponse)
+@router.post("/get-hotels-filter/", response_model=HotelsFilterResponse)
 async def hotels_filter(filter: HotelFilter):
     # url = "https://tripadvisor16.p.rapidapi.com/api/v1/hotels/searchLocation"
     url = "https://tripadvisor16.p.rapidapi.com/api/v1/hotels/getHotelsFilter"

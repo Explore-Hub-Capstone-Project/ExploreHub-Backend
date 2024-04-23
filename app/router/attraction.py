@@ -14,7 +14,7 @@ from typing import List
 router = APIRouter(prefix="/attraction", tags=["attractions"])
 
 
-@router.post("/search-attractions", response_model=List[AttractionData])
+@router.post("/search-attractions/", response_model=List[AttractionData])
 async def search_attractions(detail: AttractionRequest):
     url = "https://tourist-attraction.p.rapidapi.com/search"
     headers = {

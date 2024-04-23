@@ -11,6 +11,7 @@ env:
   X_RAPIDAPI_KEY: ${{ secrets.X_RAPIDAPI_KEY}}
   X_RAPIDAPI_HOST: ${{ secrets.X_RAPIDAPI_HOST}}
   WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY}}
+  PORT: ${{ secrets.PORT}}
 
 
 jobs:
@@ -25,7 +26,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           source: "*"
-          target: /home/ec2-user # destination path on the remote server
+          target: /home/ec2-user/ExploreHub-Backend # destination path on the remote server # destination path on the remote server
           key: |
             ${{ secrets.SSH_KEY}}
 
@@ -34,7 +35,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          envs: MONGODB_URI,SECRET_KEY,X_RAPIDAPI_KEY,X_RAPIDAPI_HOST,WEATHER_API_KEY
+          envs: MONGODB_URI,SECRET_KEY,X_RAPIDAPI_KEY,X_RAPIDAPI_HOST,WEATHER_API_KEY,PORT
           key: |
             ${{ secrets.SSH_KEY}}
           script: |

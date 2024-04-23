@@ -58,7 +58,7 @@ async def get_current_user(
 
 
 @router.post(
-    "/register", response_model=UserDisplay, status_code=status.HTTP_201_CREATED
+    "/register/", response_model=UserDisplay, status_code=status.HTTP_201_CREATED
 )
 async def register_user(request: UserCreate, db: Database = Depends(get_db)):
     return await db_user.create_user(db, request)
@@ -287,7 +287,7 @@ async def get_weather(data: SearchWeather):
         print("Error fetching weather data")
 
 
-@router.post("/add_favorite_flight", response_model=list[FavoriteFlight])
+@router.post("/add_favorite_flight/", response_model=list[FavoriteFlight])
 async def add_favorite_flight(
     favorite_flights: list[FavoriteFlight],
     current_user: User = Depends(get_current_user),
