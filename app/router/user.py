@@ -92,21 +92,10 @@ async def read_users_me(
     return current_user
 
 
-# read one user
-@router.get("/{id}", response_model=UserDisplay)
-async def get_user(id: str, current_user: Annotated[User, Depends(get_current_user)]):
-    if id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to access this resource.",
-        )
-    return current_user
-
-
 # Airport Codes API
 
 
-@router.post("/search-from-airport/")
+@router.post("/search-from-airport")
 async def search_from_airport(airport_data: AirportSearchData1):
     url = "https://tripadvisor16.p.rapidapi.com/api/v1/flights/searchAirport"
     querystring = {"query": airport_data.from_}
@@ -140,7 +129,7 @@ async def search_from_airport(airport_data: AirportSearchData1):
         )
 
 
-@router.post("/search-to-airport/")
+@router.post("/search-to-airport")
 async def search_to_airport(search_data: AirportSearchData2):
     url = "https://tripadvisor16.p.rapidapi.com/api/v1/flights/searchAirport"
     querystring = {"query": search_data.to_}
@@ -172,7 +161,7 @@ async def search_to_airport(search_data: AirportSearchData2):
         )
 
 
-@router.post("/search-round-trip-flights/")
+@router.post("/search-round-trip-flights")
 async def search_round_trip_flight(data: SearchFlight):
     url = "https://tripadvisor16.p.rapidapi.com/api/v1/flights/searchFlights"
     querystring = data.dict()
@@ -261,7 +250,7 @@ async def search_round_trip_flight(data: SearchFlight):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/get-weather/")
+@router.post("/get-weather")
 async def get_weather(data: SearchWeather):
     api_key = os.getenv("WEATHER_API_KEY") or ""
     query = data.dict()
@@ -290,7 +279,7 @@ async def get_weather(data: SearchWeather):
         print("Error fetching weather data")
 
 
-@router.post("/add_favorite_flight/", response_model=list[FavoriteFlight])
+@router.post("/add_favorite_flight", response_model=list[FavoriteFlight])
 async def add_favorite_flight(
     favorite_flights: list[FavoriteFlight],
     current_user: User = Depends(get_current_user),
@@ -315,7 +304,7 @@ async def add_favorite_flight(
     return results
 
 
-@router.post("/add_save_trip/")
+@router.post("/add_save_trip")
 async def save_for_later(request: Request, db: Database = Depends(get_db)):
     try:
         request_json = await request.json()
@@ -338,7 +327,7 @@ async def save_for_later(request: Request, db: Database = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.post("/search-one-way-flights/")
+@router.post("/search-one-way-flights")
 async def search_one_way_flight(data: SearchOneWayFlight):
     url = "https://tripadvisor16.p.rapidapi.com/api/v1/flights/searchFlights"
     querystring = data.dict()
@@ -410,10 +399,12 @@ async def search_one_way_flight(data: SearchOneWayFlight):
 
 
 @router.get("/get_saved_trips/", status_code=status.HTTP_200_OK)
+@router.get("/get_saved_trips", status_code=status.HTTP_200_OK)
 async def get_saved_trips(
-    current_user: UserDisplay = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Database = Depends(get_db),
 ):
+
     try:
         logger.info("Fetching user's saved trips")
         saved_trips_collection = db["saved_trips"]
@@ -433,3 +424,14 @@ async def get_saved_trips(
     except Exception as e:
         logger.error(f"An error occurred: {str(e)}")
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+# read one user
+@router.get("/{id}", response_model=UserDisplay)
+async def get_user(id: str, current_user: Annotated[User, Depends(get_current_user)]):
+    if id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to access this resource.",
+        )
+    return current_user

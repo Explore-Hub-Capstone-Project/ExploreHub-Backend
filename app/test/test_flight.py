@@ -31,7 +31,7 @@ def test_search_round_trip_flight_success(flight_search_data_success):
     )
 
     response = client.post(
-        "/user/search-round-trip-flights/", json=flight_search_data_success
+        "/user/search-round-trip-flights", json=flight_search_data_success
     )
     assert response.status_code == 200
 
@@ -61,7 +61,7 @@ def test_search_round_trip_flight_failure(flight_search_data_failure):
     )
 
     response = client.post(
-        "/user/search-round-trip-flights/", json=flight_search_data_failure
+        "/user/search-round-trip-flights", json=flight_search_data_failure
     )
     assert response.status_code != 200
 
@@ -91,7 +91,7 @@ def test_search_from_airport_success(airport_search_data_from_success):
     )
 
     response = client.post(
-        "/user/search-from-airport/", json=airport_search_data_from_success
+        "/user/search-from-airport", json=airport_search_data_from_success
     )
     assert response.status_code == 200
 
@@ -121,7 +121,7 @@ def test_search_from_airport_failure(airport_search_data_from_failure):
     )
 
     response = client.post(
-        "/user/search-from-airport/", json=airport_search_data_from_failure
+        "/user/search-from-airport", json=airport_search_data_from_failure
     )
     assert response.status_code != 200
 
@@ -151,7 +151,7 @@ def test_search_to_airport_success(airport_search_data_to_success):
     )
 
     response = client.post(
-        "/user/search-to-airport/", json=airport_search_data_to_success
+        "/user/search-to-airport", json=airport_search_data_to_success
     )
     assert response.status_code == 200
 
@@ -181,6 +181,6 @@ def test_search_to_airport_failure(airport_search_data_to_failure):
     )
 
     response = client.post(
-        "/user/search-to-airport/", json=airport_search_data_to_failure
+        "/user/search-to-airport", json=airport_search_data_to_failure
     )
     assert response.status_code != 200

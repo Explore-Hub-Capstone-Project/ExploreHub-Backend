@@ -37,7 +37,7 @@ async def test_add_save_trip_success(test_client, override_get_db, mock_db):
     mock_db["users"].insert_one({"email": user_email, "_id": "user_id_123"})
     trip_details = {"userEmail": user_email, "tripDetails": "Trip to Hawaii"}
 
-    response = test_client.post("/user/add_save_trip/", json=trip_details)
+    response = test_client.post("/user/add_save_trip", json=trip_details)
     assert response.status_code == 200
     assert response.json()["message"] == "Trip saved successfully"
 

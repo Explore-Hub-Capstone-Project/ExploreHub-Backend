@@ -35,6 +35,6 @@ def test_get_weather_success(weather_search_data):
         status=200,
     )
 
-    response = client.post("/user/get-weather/", json=weather_search_data)
+    response = client.post("/user/get-weather", json=weather_search_data)
     assert response.status_code == 200
     assert response.json()[0]["Description"] == "Clear"

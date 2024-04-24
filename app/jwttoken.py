@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from pprint import pprint
 from typing import Any
 from jose import JWTError, jwt
 
@@ -21,6 +22,7 @@ def create_access_token(data: dict):
 def verify_token(token: str, credentials_exception: Exception):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        pprint(payload)
         email_payload: Any | None = payload.get("user_email", None)
         id_payload: Any | None = payload.get("user_id", None)
         if email_payload is None or not isinstance(email_payload, str):

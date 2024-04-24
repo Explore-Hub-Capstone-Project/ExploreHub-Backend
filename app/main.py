@@ -35,7 +35,7 @@ def start():
         "app.main:app",
         host="0.0.0.0",
         port=settings.PORT,
-        reload=False,
+        reload=True,
     )
 
 

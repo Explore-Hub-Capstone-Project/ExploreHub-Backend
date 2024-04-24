@@ -70,7 +70,7 @@ async def search_location(location_data: Location):
         return LocationSearchResponse(locs=locs)
 
 
-@router.post("/get-hotels-filter/", response_model=HotelsFilterResponse)
+@router.post("/get-hotels-filter", response_model=HotelsFilterResponse)
 async def hotels_filter(filter: HotelFilter):
     # url = "https://tripadvisor16.p.rapidapi.com/api/v1/hotels/searchLocation"
     url = "https://tripadvisor16.p.rapidapi.com/api/v1/hotels/getHotelsFilter"
@@ -109,7 +109,7 @@ async def hotels_filter(filter: HotelFilter):
             )
 
 
-@router.post("/search-hotels/", response_model=list[HotelData])
+@router.post("/search-hotels", response_model=list[HotelData])
 async def search_hotels(filter: HotelDetailsRequest):
     url = "https://tripadvisor16.p.rapidapi.com/api/v1/hotels/searchHotels"
     headers = {
@@ -172,7 +172,7 @@ async def search_hotels(filter: HotelDetailsRequest):
     # return [HotelData(**hotel) for hotel in filtered_hotel_data]
 
 
-@router.post("/get-hotels-details/", response_model=HotelDetailDisplay)
+@router.post("/get-hotels-details", response_model=HotelDetailDisplay)
 async def hotel_details(details: HotelDetails):
     url = "https://tripadvisor16.p.rapidapi.com/api/v1/hotels/getHotelDetails"
     headers = {
@@ -188,6 +188,7 @@ async def hotel_details(details: HotelDetails):
         response = await client.get(
             url, headers=headers, params=params, timeout=httpx.Timeout(timeout=40.0)
         )
+        print(response)
         json = response.json()
         if response.status_code != 200 or json.get("status") is False:
             raise HTTPException(
