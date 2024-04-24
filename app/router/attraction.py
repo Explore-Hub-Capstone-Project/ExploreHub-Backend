@@ -18,7 +18,7 @@ router = APIRouter(prefix="/attraction", tags=["attractions"])
 async def search_attractions(detail: AttractionRequest):
     url = "https://tourist-attraction.p.rapidapi.com/search"
     headers = {
-        "X-RapidAPI-Key": os.getenv("X_RAPIDAPI_KEY"),
+        "X-RapidAPI-Key": os.getenv("X_RAPIDAPI_KEY_ATTRACTION"),
         "X-RapidAPI-Host": "tourist-attraction.p.rapidapi.com",
     }
     payload = {
